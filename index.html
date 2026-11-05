@@ -94,6 +94,8 @@ input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--a
       <li><a href="articulos/qr-para-web-o-enlace.html">Cómo crear un QR para una web o un enlace</a></li>
       <li><a href="articulos/que-es-un-codigo-qr.html">Qué es un código QR y cómo funciona</a></li>
       <li><a href="articulos/escanear-codigo-qr.html">Cómo escanear un código QR en iPhone y Android</a></li>
+      <li><a href="articulos/imprimir-codigo-qr.html">Consejos para imprimir un código QR que se pueda leer</a></li>
+      <li><a href="articulos/qr-para-menu-restaurante.html">Cómo crear un QR para un menú de restaurante</a></li>
     </ul>
   </section>
 </main>
@@ -101,7 +103,7 @@ input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--a
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 (function(){
-  var esc = function(s){ return String(s).replace(/([\\;,:"])/g,'\\$1'); };
+  var esc = function(s){ return String(s).replace(/([\\;,:\"])/g,'\\$1'); };
   var TYPES = {
     url:{label:'Web',fields:[{id:'u',label:'Dirección web',ph:'ejemplo.com',type:'url'}],
       build:function(v){ if(!v.u) return ''; return /^[a-z][a-z0-9+.-]*:\/\//i.test(v.u) ? v.u : 'https://'+v.u; }},
