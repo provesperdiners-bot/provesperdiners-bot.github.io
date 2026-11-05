@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QR in seconds</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#EEF2F5; --panel:#FFFFFF; --ink:#12263A; --muted:#5B6B7B; --line:#CBD5DE; --accent:#2F54EB; --accent-ink:#FFFFFF;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0F1923; --panel:#172431; --ink:#E6EDF3; --muted:#93A4B5; --line:#2B3C4C; --accent:#6C8CFF; --accent-ink:#0F1923;}
+}
+:root[data-theme="dark"]{--bg:#0F1923; --panel:#172431; --ink:#E6EDF3; --muted:#93A4B5; --line:#2B3C4C; --accent:#6C8CFF; --accent-ink:#0F1923;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:980px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;font-weight:800;margin:0 0 8px;letter-spacing:-.02em}
+.lead{color:var(--muted);margin:0 0 28px;max-width:52ch}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.tabs button{font:inherit;font-weight:600;font-size:.92rem;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tabs button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+label{display:block;font-weight:600;font-size:.92rem;margin:0 0 14px}
+input,select,textarea{display:block;width:100%;margin-top:6px;font:inherit;font-weight:400;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:92px;resize:vertical}
+.hint{color:var(--muted);font-size:.85rem;margin:0}
+.out{text-align:center}
+.qrbox{background:#fff;border-radius:10px;border:1px solid var(--line);aspect-ratio:1;display:grid;place-items:center;overflow:hidden}
+.qrbox img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.empty{color:#5B6B7B;padding:24px;font-size:.95rem}
+.payload{margin-top:14px;font-size:.8rem;color:var(--muted);word-break:break-all;text-align:left}
+.out p.hint{margin-top:12px}
+.custom{border:1px solid var(--line);border-radius:10px;margin:8px 0 0;padding:14px 16px 6px;min-width:0}
+.custom legend{font-weight:600;padding:0 6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type=color]{height:42px;padding:3px;cursor:pointer}
+input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--accent)}
+.ghost{font:inherit;font-weight:600;font-size:.9rem;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;margin-bottom:14px}
+.ghost:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <h1>QR in seconds</h1>
+  <p class="lead">Genera códigos QR para webs, correo, teléfono, WhatsApp, Wi‑Fi y más. Elige el tipo, rellena los datos y el código aparece al momento.</p>
+  <div class="grid">
+    <section class="card" aria-label="Datos">
+      <div class="tabs" id="tabs" role="group" aria-label="Tipo de enlace"></div>
+      <div id="fields"></div>
+      <fieldset class="custom"><legend>Personalizar</legend>
+        <div class="row">
+          <label>Color del código<input type="color" id="c_fg" value="#12263A"></label>
+          <label>Color de fondo<input type="color" id="c_bg" value="#FFFFFF"></label>
+        </div>
+        <label>Forma de los puntos<select id="c_style"><option value="square">Cuadrados</option><option value="round">Redondeados</option><option value="dots">Círculos</option></select></label>
+        <label>Logo (PNG, JPG o SVG)<input type="file" id="c_logo" accept="image/*"></label>
+        <label>Tamaño del logo<input type="range" id="c_size" min="15" max="30" value="22"></label>
+        <button type="button" id="c_clear" class="ghost">Quitar logo</button>
+        <p class="hint" style="margin-bottom:12px">Mantén buen contraste: el código debe ser más oscuro que el fondo para que se pueda escanear.</p>
+      </fieldset>
+    </section>
+    <section class="card out" aria-live="polite">
+      <div class="qrbox" id="qrbox"><div class="empty">Escribe los datos para ver el código.</div></div>
+      <p class="hint">Para guardarlo, mantén pulsada la imagen (móvil) o haz clic derecho y elige «Guardar imagen».</p>
+      <div class="payload" id="payload"></div>
+    </section>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function(){
+  var esc = function(s){ return String(s).replace(/([\\;,:"])/g,'\\$1'); };
+  var TYPES = {
+    url:{label:'Web',fields:[{id:'u',label:'Dirección web',ph:'ejemplo.com',type:'url'}],
+      build:function(v){ if(!v.u) return ''; return /^[a-z][a-z0-9+.-]*:\/\//i.test(v.u) ? v.u : 'https://'+v.u; }},
+    email:{label:'Correo',fields:[
+      {id:'to',label:'Dirección de correo',ph:'nombre@ejemplo.com',type:'email'},
+      {id:'subject',label:'Asunto (opcional)',type:'text'},
+      {id:'body',label:'Mensaje (opcional)',type:'area'}],
+      build:function(v){ if(!v.to) return ''; var q=[]; if(v.subject) q.push('subject='+encodeURIComponent(v.subject)); if(v.body) q.push('body='+encodeURIComponent(v.body)); return 'mailto:'+v.to+(q.length?'?'+q.join('&'):''); }},
+    tel:{label:'Teléfono',fields:[{id:'n',label:'Número con prefijo',ph:'+34 600 000 000',type:'tel'}],
+      build:function(v){ var n=(v.n||'').replace(/[^\d+]/g,''); return n?'tel:'+n:''; }},
+    sms:{label:'SMS',fields:[
+      {id:'n',label:'Número con prefijo',ph:'+34 600 000 000',type:'tel'},
+      {id:'m',label:'Mensaje (opcional)',type:'area'}],
+      build:function(v){ var n=(v.n||'').replace(/[^\d+]/g,''); return n?'SMSTO:'+n+':'+(v.m||''):''; }},
+    wa:{label:'WhatsApp',fields:[
+      {id:'n',label:'Número con prefijo',ph:'+34 600 000 000',type:'tel'},
+      {id:'m',label:'Mensaje (opcional)',type:'area'}],
+      build:function(v){ var n=(v.n||'').replace(/\D/g,''); return n?'https://wa.me/'+n+(v.m?'?text='+encodeURIComponent(v.m):''):''; }},
+    wifi:{label:'Wi‑Fi',fields:[
+      {id:'ssid',label:'Nombre de la red',type:'text'},
+      {id:'pass',label:'Contraseña',type:'text'},
+      {id:'sec',label:'Seguridad',type:'select',options:[['WPA','WPA / WPA2 / WPA3'],['WEP','WEP'],['nopass','Sin contraseña']]}],
+      build:function(v){ if(!v.ssid) return ''; var s=v.sec||'WPA'; return 'WIFI:T:'+s+';S:'+esc(v.ssid)+';'+(s==='nopass'?'':'P:'+esc(v.pass||'')+';')+';'; }},
+    text:{label:'Texto',fields:[{id:'t',label:'Texto libre',type:'area'}],
+      build:function(v){ return v.t||''; }}
+  };
+  var current='url', values={}, logoImg=null;
+  function g(id){ return document.getElementById(id).value; }
+  var tabs=document.getElementById('tabs'), fields=document.getElementById('fields'),
+      box=document.getElementById('qrbox'), payload=document.getElementById('payload');
+
+  function renderTabs(){
+    tabs.innerHTML='';
+    Object.keys(TYPES).forEach(function(k){
+      var b=document.createElement('button'); b.type='button'; b.textContent=TYPES[k].label;
+      b.setAttribute('aria-pressed', k===current);
+      b.onclick=function(){ current=k; values={}; renderTabs(); renderFields(); update(); };
+      tabs.appendChild(b);
+    });
+  }
+  function renderFields(){
+    fields.innerHTML='';
+    TYPES[current].fields.forEach(function(f){
+      var l=document.createElement('label'); l.appendChild(document.createTextNode(f.label));
+      var el;
+      if(f.type==='area'){ el=document.createElement('textarea'); }
+      else if(f.type==='select'){ el=document.createElement('select'); f.options.forEach(function(o){ var op=document.createElement('option'); op.value=o[0]; op.textContent=o[1]; el.appendChild(op); }); }
+      else { el=document.createElement('input'); el.type=f.type; el.autocomplete='off'; }
+      if(f.ph) el.placeholder=f.ph;
+      el.id='f_'+f.id;
+      var h=function(){ values[f.id]=el.value; update(); };
+      el.addEventListener('input',h); el.addEventListener('change',h);
+      l.appendChild(el); fields.appendChild(l);
+    });
+  }
+  function showEmpty(msg){ box.innerHTML=''; var d=document.createElement('div'); d.className='empty'; d.textContent=msg; box.appendChild(d); payload.textContent=''; }
+  function update(){
+    var vals={}; TYPES[current].fields.forEach(function(f){ var el=document.getElementById('f_'+f.id); vals[f.id]=el?el.value:''; });
+    var text=TYPES[current].build(vals);
+    if(!text){ showEmpty('Escribe los datos para ver el código.'); return; }
+    try{
+      var logoOn=!!logoImg, qr=qrcode(0,logoOn?'H':'M'); qr.addData(text); qr.make();
+      var n=qr.getModuleCount(), m=4, s=Math.max(4,Math.floor(720/(n+2*m))), size=(n+2*m)*s;
+      var c=document.createElement('canvas'); c.width=c.height=size;
+      var x=c.getContext('2d'); x.fillStyle=g('c_bg'); x.fillRect(0,0,size,size); x.fillStyle=g('c_fg'); var st=g('c_style');
+      for(var r=0;r<n;r++) for(var q=0;q<n;q++) if(qr.isDark(r,q)){ var px=(q+m)*s, py=(r+m)*s; if(st==='dots'){ x.beginPath(); x.arc(px+s/2,py+s/2,s*0.47,0,6.2832); x.fill(); } else if(st==='round'&&x.roundRect){ x.beginPath(); x.roundRect(px,py,s,s,s*0.35); x.fill(); } else { x.fillRect(px,py,s,s); } }
+      if(logoOn){ var L=n*s*(g('c_size')/100), mid=size/2, pad=L*0.12; x.fillStyle=g('c_bg'); if(x.roundRect){ x.beginPath(); x.roundRect(mid-L/2,mid-L/2,L,L,L*0.2); x.fill(); } else { x.fillRect(mid-L/2,mid-L/2,L,L); } var k=Math.min((L-2*pad)/logoImg.width,(L-2*pad)/logoImg.height), w=logoImg.width*k, h=logoImg.height*k; x.drawImage(logoImg,mid-w/2,mid-h/2,w,h); }
+      var img=new Image(); img.alt='Código QR generado'; img.src=c.toDataURL('image/png');
+      box.innerHTML=''; box.appendChild(img);
+      payload.textContent='Contenido: '+text;
+    }catch(e){ showEmpty('El contenido es demasiado largo para un código QR. Acórtalo.'); }
+  }
+  renderTabs(); renderFields(); update();
+  var cs=document.querySelectorAll('.custom input,.custom select');
+  for(var i=0;i<cs.length;i++){ cs[i].addEventListener('input',update); cs[i].addEventListener('change',update); }
+  document.getElementById('c_logo').addEventListener('change',function(){
+    var f=this.files&&this.files[0]; if(!f) return;
+    var fr=new FileReader();
+    fr.onload=function(){ var im=new Image(); im.onload=function(){ logoImg=im; update(); }; im.src=fr.result; };
+    fr.readAsDataURL(f);
+  });
+  document.getElementById('c_clear').onclick=function(){ logoImg=null; document.getElementById('c_logo').value=''; update(); };
+})();
+</script>
+</body>
+</html>
