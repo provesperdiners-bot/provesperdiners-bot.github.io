@@ -1,6 +1,1 @@
-# Los comentarios explican qué debes cambiar cuando tengas una cuenta de Google AdSense.
-# Sustituye ca-pub-XXXXXXXXXXXXXXXX por el identificador de editor que aparece en tu cuenta.
-# Después, publica este archivo como /ads.txt en la raíz del sitio; la línea debe tener el formato:
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
-# Descomenta la línea siguiente solo después de reemplazar el ID de ejemplo por el tuyo:
-# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+google.com, pub-5090581342866564, DIRECT, f08c47fec0942fa0
